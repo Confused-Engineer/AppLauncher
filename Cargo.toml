@@ -1,8 +1,9 @@
 [package]
 name = "applauncher"
 version = "0.1.0"
-authors = ["David Pierce <dpierce33100@gmail.com>"]
+authors = ["Confused Engineer"]
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 egui = "0.27.0"
@@ -34,6 +35,10 @@ opt-level = 2 # fast and small wasm
 opt-level = 2
 
 
+
+[build-dependencies]
+winres = "0.1"
+static_vcruntime = "2.0"
 
 
 [[bin]]
