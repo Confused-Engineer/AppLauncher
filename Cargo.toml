@@ -16,6 +16,8 @@ serde = { version = "1", features = ["derive"] }
 log = "0.4"
 env_logger = "0.10"
 rust-ini = "0.19"
+axum = "0.7.4"
+tokio = { version = "1.36.0", features = ["full"] }
 
 [build-dependencies]
 winres = "0.1"
