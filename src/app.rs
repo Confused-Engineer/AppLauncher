@@ -533,7 +533,7 @@ impl Config
 
                 Command::new("cmd")
                     .args(["/C", self.config_path.as_str()])
-                    //.creation_flags(0x08000000)
+                    .creation_flags(0x08000000)
                     .spawn()
                     .expect("failed to execute process");
             }
@@ -564,7 +564,7 @@ impl Config
         {
             Command::new("cmd")
             .args(["/C", self.config_path.as_str()])
-            //.creation_flags(0x08000000)
+            .creation_flags(0x08000000)
             .spawn()
             .expect("failed to execute process");
         }
