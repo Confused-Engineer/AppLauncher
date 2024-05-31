@@ -6,3 +6,4 @@ pub use app::Config;
 mod page_config;
 mod page_config_edit;
 mod page_main;
+mod page_api;

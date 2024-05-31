@@ -9,6 +9,7 @@ use std::process::Command;
 use crate::page_config::page_config;
 use crate::page_config_edit::page_configedit;
 use crate::page_main::page_main;
+use crate::page_api::show_page_api;
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -48,6 +49,11 @@ impl TemplateApp {
 
     fn update_app(&mut self)
     {
+        Command::new("curl")
+            .arg(format!("http://localhost:{}/api/v1/quit", Config::get_port()))
+            .creation_flags(0x08000000)
+            .spawn()
+            .expect("failed to execute process");
 
         Command::new("cmd")
             .args(["/C","msg", "%username%","Updating to latest version"])
@@ -56,7 +62,7 @@ impl TemplateApp {
             .expect("failed to execute process");
 
         Command::new("cmd")
-            .args(["/C","timeout", "1","&","curl.exe","-L","https://github.com/Confused-Engineer/AppLauncher/releases/download/nightly/AppLauncher.exe","-o",env::current_exe().unwrap().to_str().unwrap(),"&","timeout","1"])
+            .args(["/C","timeout", "1","&","curl.exe","-L","https://github.com/Confused-Engineer/AppLauncher/releases/download/nightly/AppLauncher.exe","-o",env::current_exe().unwrap().to_str().unwrap(),"&","timeout","1","&",env::current_exe().unwrap().to_str().unwrap()])
             .creation_flags(0x08000000)
             .spawn()
             .expect("failed to execute process");
@@ -176,8 +182,10 @@ impl eframe::App for TemplateApp {
 
             if self.page.api
             {
+                ui.add_space(20.0);
                 ui.heading("API");
                 ui.separator();
+                show_page_api(ui, ctx, &mut self.config);
             }
 
             
@@ -250,6 +258,8 @@ pub struct  Config {
     config_change_pending: bool,
     pub key_new: String,
     pub val_new: String,
+    pub port_new: String,
+    pub token_new: String,
 }
 
 impl Default for Config
@@ -263,6 +273,8 @@ impl Default for Config
             config_change_pending: false,
             key_new: String::new(),
             val_new: String::new(),
+            port_new: String::new(),
+            token_new: String::new(),
         }
     }
 }

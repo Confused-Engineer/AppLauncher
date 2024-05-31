@@ -26,7 +26,7 @@ fn main() -> eframe::Result<()> {
 
     if !args.is_empty()
     {
-        println!("close");
+        std::process::exit(0);
     }
 
 
@@ -34,8 +34,8 @@ fn main() -> eframe::Result<()> {
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([400.0, 300.0])
-            .with_min_inner_size([300.0, 220.0])
+            .with_inner_size([1500.0, 800.0])
+            .with_min_inner_size([1100.0, 700.0])
             .with_icon(
                 // NOTE: Adding an icon is optional
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon-512.png")[..])
@@ -62,6 +62,7 @@ async fn api()
     .route("/test", get(test));
 
 
+
     let api_routes: Router = Router::new()
     .merge(app)
     .merge(app_router());
@@ -76,12 +77,16 @@ fn app_router() -> Router
 {
     if applauncher::Config::key_exists()
     {
-        return Router::new().route("/api/v1/launch/:key/:section", get(launch_key));
+        return Router::new().route("/api/v1/launch/:key/:section", get(launch_key))
+        .route("/api/v1/:key/shutdown", get(key_shutdown))
+        .route("/api/v1/:key/restart", get(key_restart))
+        .route("/api/v1/:key/quit", get(key_quit));
     } else {
-        return Router::new()
-            .route("/api/v1/launch/:section", get(launch))
-            .route("/api/v1/shutdown", get(test))
-            .route("/api/v1/restart", get(test));
+        return Router::new().route("/api/v1/launch/:section", get(launch))
+        .route("/api/v1/shutdown", get(shutdown))
+        .route("/api/v1/restart", get(restart))
+        .route("/api/v1/quit", get(quit))
+
     }
 }
 
@@ -89,6 +94,74 @@ fn app_router() -> Router
 async fn test() -> String
 {
     "Connection Successful".to_string()
+}
+
+async fn quit()
+{
+ std::process::exit(0);
+}
+
+async fn key_quit(Path(key):Path<String>)
+{
+    if applauncher::Config::key_matches(key)
+    {
+        std::process::exit(0);
+    } 
+}
+
+async fn shutdown() -> String
+{
+    std::process::Command::new("shutdown")
+        .arg("/t")
+        .arg("1")
+        .arg("/s")
+        .spawn()
+        .expect("failed to execute process");
+    "Shutting Down".to_string()
+}
+
+async fn restart() -> String
+{
+    std::process::Command::new("shutdown")
+        .arg("/t")
+        .arg("1")
+        .arg("/r")
+        .spawn()
+        .expect("failed to execute process");
+    "Restarting".to_string()
+}
+
+async fn key_shutdown(Path(key):Path<String>) -> String
+{
+    if applauncher::Config::key_matches(key)
+    {
+        std::process::Command::new("shutdown")
+            .arg("/t")
+            .arg("1")
+            .arg("/s")
+            .spawn()
+            .expect("failed to execute process");
+        "Restarting".to_string()
+    } else {
+        return "Wrong".to_string();
+    }
+}
+
+async fn key_restart(Path(key):Path<String>) -> String
+{
+    if applauncher::Config::key_matches(key)
+    {
+        std::process::Command::new("shutdown")
+            .arg("/t")
+            .arg("1")
+            .arg("/r")
+            .spawn()
+            .expect("failed to execute process");
+        "Restarting".to_string()
+    } else {
+        return "Wrong".to_string();
+    }
+
 }
 
 async fn launch_key(Path((key, section)):Path<(String, String)>) -> String
@@ -106,6 +179,7 @@ async fn launch_key(Path((key, section)):Path<(String, String)>) -> String
 }
 
 
-async fn launch(Path(section):Path<String>) {
+async fn launch(Path(section):Path<String>) -> String {
     applauncher::Config::launch_section_standalone(section);
+    "Launching".to_string()
 }
