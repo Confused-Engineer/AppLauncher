@@ -27,6 +27,15 @@ pub fn page_main(ui: &mut Ui, config: &mut Config)
                     .creation_flags(0x08000000)
                     .spawn()
                     .expect("failed to execute process");
+
+                std::process::Command::new("cmd")
+                    .arg("/c")
+                    .arg("curl")
+                    .arg(format!("http://localhost:{}/test", Config::get_port()))
+                    .arg("&")
+                    .args(["timeout", "5"])
+                    .spawn()
+                    .expect("failed to execute process");
             }
             if ui.add_sized([100.0, 40.0], egui::widgets::Button::new("End API")).clicked()
             {
